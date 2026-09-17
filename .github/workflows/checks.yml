@@ -20,10 +20,6 @@ jobs:
           xcodegen generate
       - name: Build app, App Intents and widget for simulator
         run: xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget -sdk iphonesimulator -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build-for-testing
-      - name: Run native bridge tests
-        run: |
-          DEVICE=$(xcrun simctl list devices available -j | ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.find { |x| x["name"].start_with?("iPhone") }; abort "No iPhone simulator" unless d; puts d["udid"]')
-          xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO test
       - name: Capture redesigned app screens
         run: |
           mkdir -p output/screenshots
@@ -44,3 +40,7 @@ jobs:
           name: redesigned-app-screens
           path: output/screenshots/*.png
           if-no-files-found: error
+      - name: Run native bridge tests
+        run: |
+          DEVICE=$(xcrun simctl list devices booted -j | ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.first; abort "No booted iPhone simulator" unless d; puts d["udid"]')
+          xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO test
