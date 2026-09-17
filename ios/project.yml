@@ -48,6 +48,8 @@ targets:
         UILaunchScreen: {}
         AppGroupIdentifier: $(APP_GROUP)
         NSFaceIDUsageDescription: 가계부 잠금 해제에 사용합니다.
+        UIAppFonts:
+          - PretendardVariable.ttf
         CFBundleURLTypes:
           - CFBundleURLSchemes: [aibudget]
     entitlements:

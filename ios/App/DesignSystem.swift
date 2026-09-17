@@ -13,6 +13,22 @@ enum MoaTheme {
     )
 }
 
+enum MoaFont {
+    private static let family = "PretendardVariable-Regular"
+
+    static let largeTitle = Font.custom(family, size: 34, relativeTo: .largeTitle).weight(.bold)
+    static let title2 = Font.custom(family, size: 22, relativeTo: .title2).weight(.bold)
+    static let title3 = Font.custom(family, size: 20, relativeTo: .title3).weight(.bold)
+    static let headline = Font.custom(family, size: 17, relativeTo: .headline).weight(.semibold)
+    static let body = Font.custom(family, size: 17, relativeTo: .body)
+    static let subheadline = Font.custom(family, size: 15, relativeTo: .subheadline)
+    static let subheadlineBold = Font.custom(family, size: 15, relativeTo: .subheadline).weight(.semibold)
+    static let caption = Font.custom(family, size: 12, relativeTo: .caption)
+    static let captionBold = Font.custom(family, size: 12, relativeTo: .caption).weight(.semibold)
+    static let caption2 = Font.custom(family, size: 11, relativeTo: .caption2)
+    static let heroAmount = Font.custom(family, fixedSize: 38).weight(.bold)
+}
+
 struct MoaPage<Content: View>: View {
     let content: Content
     init(@ViewBuilder content: () -> Content) { self.content = content() }
@@ -56,8 +72,8 @@ struct MoaSectionTitle: View {
     var subtitle: String? = nil
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(title).font(.title3.bold()).foregroundStyle(MoaTheme.ink)
-            if let subtitle { Text(subtitle).font(.subheadline).foregroundStyle(.secondary) }
+            Text(title).font(MoaFont.title3).foregroundStyle(MoaTheme.ink)
+            if let subtitle { Text(subtitle).font(MoaFont.subheadline).foregroundStyle(.secondary) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -69,7 +85,7 @@ struct MoaStatusPill: View {
     var color: Color = MoaTheme.teal
     var body: some View {
         Label(text, systemImage: systemImage)
-            .font(.caption.bold())
+            .font(MoaFont.captionBold)
             .foregroundStyle(color)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
@@ -85,12 +101,12 @@ struct MoaMetric: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: systemImage)
-                .font(.headline)
+                .font(MoaFont.headline)
                 .foregroundStyle(tint)
                 .frame(width: 34, height: 34)
                 .background(tint.opacity(0.12), in: Circle())
-            Text(value).font(.headline).minimumScaleFactor(0.7).lineLimit(1)
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(value).font(MoaFont.headline).minimumScaleFactor(0.7).lineLimit(1)
+            Text(title).font(MoaFont.caption).foregroundStyle(.secondary)
         }
         .padding(15)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -120,16 +136,16 @@ struct MoaSettingsLink<Destination: View>: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: systemImage)
-                    .font(.title3.bold())
+                    .font(MoaFont.title3)
                     .foregroundStyle(tint)
                     .frame(width: 44, height: 44)
                     .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(title).font(.headline).foregroundStyle(.primary)
-                    Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    Text(title).font(MoaFont.headline).foregroundStyle(.primary)
+                    Text(subtitle).font(MoaFont.caption).foregroundStyle(.secondary).lineLimit(2)
                 }
                 Spacer()
-                Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
+                Image(systemName: "chevron.right").font(MoaFont.captionBold).foregroundStyle(.tertiary)
             }
             .contentShape(Rectangle())
         }
@@ -148,7 +164,7 @@ struct MoaPrimaryButton: View {
                 if let systemImage { Label(title, systemImage: systemImage) }
                 else { Text(title) }
             }
-            .font(.headline)
+            .font(MoaFont.headline)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .foregroundStyle(.white)

@@ -18,19 +18,19 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("내 가계부 설정").font(.title2.bold()).foregroundStyle(.white)
-                        Text("필요한 항목만 골라서 바꿀 수 있어요").font(.subheadline).foregroundStyle(.white.opacity(0.8))
+                        Text("내 가계부 설정").font(MoaFont.title2).foregroundStyle(.white)
+                        Text("필요한 항목만 골라서 바꿀 수 있어요").font(MoaFont.subheadline).foregroundStyle(.white.opacity(0.8))
                     }
                     Spacer()
                     Text("\(setupCount)/4")
-                        .font(.title3.bold()).foregroundStyle(.white)
+                        .font(MoaFont.title3).foregroundStyle(.white)
                         .frame(width: 56, height: 56)
                         .background(.white.opacity(0.16), in: Circle())
                 }
                 ProgressView(value: Double(setupCount), total: 4).tint(.white)
                 NavigationLink { QuickSetupView() } label: {
                     Label(model.settings["setupDone"] as? Bool == true ? "빠른 설정 다시 보기" : "빠른 설정 시작", systemImage: "wand.and.stars")
-                        .font(.headline)
+                        .font(MoaFont.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(.white, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -63,19 +63,19 @@ struct SettingsView: View {
             MoaSectionTitle(title: "연결 상태", subtitle: "권한과 자동 기록을 한곳에서 확인하세요")
             MoaCard {
                 HStack {
-                    Label("알림", systemImage: "bell.fill").font(.subheadline.bold())
+                    Label("알림", systemImage: "bell.fill").font(MoaFont.subheadlineBold)
                     Spacer()
                     MoaStatusPill(text: notificationState, systemImage: notificationState == "허용됨" ? "checkmark" : "exclamationmark")
                 }
                 Divider()
                 HStack {
-                    Label("홈 화면 위젯", systemImage: "square.grid.2x2.fill").font(.subheadline.bold())
+                    Label("홈 화면 위젯", systemImage: "square.grid.2x2.fill").font(MoaFont.subheadlineBold)
                     Spacer()
                     MoaStatusPill(text: widgetState, systemImage: widgetState == "추가됨" ? "checkmark" : "plus")
                 }
                 Divider()
                 HStack {
-                    Label("장부 공유", systemImage: "arrow.triangle.2.circlepath").font(.subheadline.bold())
+                    Label("장부 공유", systemImage: "arrow.triangle.2.circlepath").font(MoaFont.subheadlineBold)
                     Spacer()
                     MoaStatusPill(
                         text: LedgerStore.sharedStorageDescription,
@@ -84,7 +84,7 @@ struct SettingsView: View {
                     )
                 }
                 NavigationLink { AutomationCenterView() } label: {
-                    Text("자동화 센터 열기").font(.headline).frame(maxWidth: .infinity).padding(.top, 6)
+                    Text("자동화 센터 열기").font(MoaFont.headline).frame(maxWidth: .infinity).padding(.top, 6)
                 }
             }
 
@@ -129,7 +129,7 @@ struct QuickSetupView: View {
     var body: some View {
         MoaPage {
             VStack(alignment: .leading, spacing: 8) {
-                Text("\(step + 1) / 3").font(.caption.bold()).foregroundStyle(MoaTheme.teal)
+                Text("\(step + 1) / 3").font(MoaFont.captionBold).foregroundStyle(MoaTheme.teal)
                 ProgressView(value: Double(step + 1), total: 3).tint(MoaTheme.teal)
             }
             MoaCard {
@@ -158,8 +158,8 @@ struct QuickSetupView: View {
 
     private var moneyStep: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("한 달 예산의 기준", systemImage: "wallet.pass.fill").font(.title3.bold()).foregroundStyle(MoaTheme.teal)
-            Text("월급에서 저축 목표와 고정비를 빼고 쓸 수 있는 생활비를 계산해요.").font(.subheadline).foregroundStyle(.secondary)
+            Label("한 달 예산의 기준", systemImage: "wallet.pass.fill").font(MoaFont.title3).foregroundStyle(MoaTheme.teal)
+            Text("월급에서 저축 목표와 고정비를 빼고 쓸 수 있는 생활비를 계산해요.").font(MoaFont.subheadline).foregroundStyle(.secondary)
             TextField("예상 월급", text: $expected).keyboardType(.numberPad).moaField()
             TextField("매달 저축 목표", text: $savings).keyboardType(.numberPad).moaField()
         }
@@ -167,7 +167,7 @@ struct QuickSetupView: View {
 
     private var scheduleStep: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("잊지 않도록 알려드릴게요", systemImage: "bell.badge.fill").font(.title3.bold()).foregroundStyle(MoaTheme.teal)
+            Label("잊지 않도록 알려드릴게요", systemImage: "bell.badge.fill").font(MoaFont.title3).foregroundStyle(MoaTheme.teal)
             SettingPickerRow(title: "월급 확인일", value: "매월 \(salaryDay)일") {
                 Picker("월급 확인일", selection: $salaryDay) { ForEach(1...31, id: \.self) { Text("\($0)일").tag($0) } }
             }
@@ -186,9 +186,9 @@ struct QuickSetupView: View {
     private var finishStep: some View {
         VStack(alignment: .leading, spacing: 14) {
             Image(systemName: "checkmark.seal.fill").font(.system(size: 46)).foregroundStyle(MoaTheme.teal)
-            Text("기본 설정이 준비됐어요").font(.title2.bold())
+            Text("기본 설정이 준비됐어요").font(MoaFont.title2)
             Text("AI는 개인정보를 외부로 보내지 않는 기기 내 결산으로 시작합니다. 카드 자동 기록과 개인 API는 자동화 센터에서 필요할 때 연결하세요.")
-                .font(.subheadline).foregroundStyle(.secondary)
+                .font(MoaFont.subheadline).foregroundStyle(.secondary)
             LabeledContent("예상 월급", value: expected.isEmpty ? "0원" : (Int64(expected) ?? 0).formatted() + "원")
             LabeledContent("저축 목표", value: savings.isEmpty ? "0원" : (Int64(savings) ?? 0).formatted() + "원")
             LabeledContent("결산 시간", value: hourLabel(auditHour))
@@ -229,11 +229,11 @@ struct SettingPickerRow<Content: View>: View {
     }
     var body: some View {
         HStack {
-            Text(title).font(.subheadline.bold())
+            Text(title).font(MoaFont.subheadlineBold)
             Spacer()
             Menu { content } label: {
                 HStack(spacing: 5) { Text(value); Image(systemName: "chevron.up.chevron.down") }
-                    .font(.subheadline).foregroundStyle(MoaTheme.teal)
+                    .font(MoaFont.subheadline).foregroundStyle(MoaTheme.teal)
             }
         }
         .padding(13)
@@ -256,7 +256,7 @@ struct BudgetPreferencesView: View {
             Section("월 예산") {
                 TextField("예상 월급", text: $expected).keyboardType(.numberPad)
                 TextField("저축 목표", text: $savings).keyboardType(.numberPad)
-                Text("생활비 = 월급 − 저축 목표 − 고정비 예약액").font(.caption).foregroundStyle(.secondary)
+                Text("생활비 = 월급 − 저축 목표 − 고정비 예약액").font(MoaFont.caption).foregroundStyle(.secondary)
             }
             Section("알림과 결산") {
                 Picker("월급 확인일", selection: $salaryDay) { ForEach(1...31, id: \.self) { Text("\($0)일").tag($0) } }
@@ -264,7 +264,7 @@ struct BudgetPreferencesView: View {
                 Picker("야간 결산", selection: $auditHour) { ForEach(0..<24, id: \.self) { Text(hourLabel($0)).tag($0) } }
                 Picker("주간 마감", selection: $weekEnd) { ForEach(0..<7) { Text(weekday($0)).tag($0) } }
             }
-            Section { Button("변경사항 저장") { save() }.font(.headline).frame(maxWidth: .infinity) }
+            Section { Button("변경사항 저장") { save() }.font(MoaFont.headline).frame(maxWidth: .infinity) }
         }
         .navigationTitle("예산과 시간")
         .task { load() }
@@ -308,7 +308,7 @@ struct AISettingsView: View {
                     Label("개인 API", systemImage: "sparkles").tag("personal")
                 }.pickerStyle(.inline)
                 Text(mode == "local" ? "외부 전송 없이 수입·지출 숫자를 정리합니다." : "아이폰에서 선택한 AI 서비스로 집계값만 직접 보냅니다.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(MoaFont.caption).foregroundStyle(.secondary)
             }
             if mode == "personal" {
                 Section("개인 API") {
@@ -327,19 +327,19 @@ struct AISettingsView: View {
                             Text("Compound Mini").tag("groq/compound-mini")
                             Text("Compound").tag("groq/compound")
                         }
-                        if !lastGroqModel.isEmpty { LabeledContent("최근 성공", value: lastGroqModel).font(.caption) }
+                        if !lastGroqModel.isEmpty { LabeledContent("최근 성공", value: lastGroqModel).font(MoaFont.caption) }
                         Text("선택 모델의 한도나 장애가 감지되면 사용 가능한 다른 Groq 모델로 자동 전환합니다.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(MoaFont.caption).foregroundStyle(.secondary)
                     } else {
                         TextField("모델 ID · 선택", text: $modelID).textInputAutocapitalization(.never).autocorrectionDisabled()
                     }
                     Toggle("집계 데이터 전송에 동의", isOn: $consent)
                     Text("원본 알림, 카드·계좌번호, 이름과 가맹점 원문은 AI로 보내지 않습니다.")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(MoaFont.caption).foregroundStyle(.secondary)
                 }
             }
             Section {
-                Button("AI 설정 저장") { save() }.font(.headline).frame(maxWidth: .infinity)
+                Button("AI 설정 저장") { save() }.font(MoaFont.headline).frame(maxWidth: .infinity)
                 if mode == "personal" {
                     Button("저장된 \(provider) 키 삭제", role: .destructive) {
                         do { try Secrets.set("api-" + provider, ""); key = ""; model.message = "API 키를 삭제했습니다." }
@@ -379,8 +379,8 @@ struct AutomationCenterView: View {
     var body: some View {
         MoaPage {
             MoaCard {
-                Label("알림", systemImage: "bell.fill").font(.title3.bold())
-                Text("월급 확인과 결산 완료 알림에 사용합니다.").font(.subheadline).foregroundStyle(.secondary)
+                Label("알림", systemImage: "bell.fill").font(MoaFont.title3)
+                Text("월급 확인과 결산 완료 알림에 사용합니다.").font(MoaFont.subheadline).foregroundStyle(.secondary)
                 HStack {
                     MoaStatusPill(text: notificationState, systemImage: notificationState == "허용됨" ? "checkmark" : "bell.slash")
                     Spacer()
@@ -389,9 +389,9 @@ struct AutomationCenterView: View {
                 }
             }
             MoaCard {
-                Label("홈 화면 위젯", systemImage: "square.grid.2x2.fill").font(.title3.bold())
+                Label("홈 화면 위젯", systemImage: "square.grid.2x2.fill").font(MoaFont.title3)
                 Text("위젯에는 별도의 허용 팝업이 없습니다. 홈 화면에 추가하면 바로 작동합니다.")
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(MoaFont.subheadline).foregroundStyle(.secondary)
                 HStack {
                     MoaStatusPill(text: widgetState, systemImage: widgetState == "추가됨" ? "checkmark" : "plus")
                     Spacer()
@@ -402,7 +402,7 @@ struct AutomationCenterView: View {
                     )
                 }
                 NavigationLink("위젯 추가 방법 보기") { SetupGuide(kind: "widget") }
-                    .font(.headline)
+                    .font(MoaFont.headline)
             }
             MoaCard {
                 MoaSettingsLink(title: "카드사 선택", subtitle: "사용하는 카드만 켜고 감지어 조정", systemImage: "creditcard.fill", tint: .blue) { CardSourcesView() }
@@ -483,9 +483,9 @@ struct CardSourcesView: View {
                             keywords = (source["keywords"] as? [String] ?? []).joined(separator: ", ")
                         } label: {
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(sources[index]["name"] as? String ?? "").font(.subheadline.bold())
+                                Text(sources[index]["name"] as? String ?? "").font(MoaFont.subheadlineBold)
                                 Text((sources[index]["keywords"] as? [String] ?? []).joined(separator: " · "))
-                                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                    .font(MoaFont.caption).foregroundStyle(.secondary).lineLimit(1)
                             }
                         }.buttonStyle(.plain)
                         Spacer()
@@ -499,7 +499,7 @@ struct CardSourcesView: View {
             Section(editingID == nil ? "직접 추가" : "선택한 카드사 수정") {
                 TextField("표시 이름", text: $name)
                 TextField("감지어 · 쉼표로 구분", text: $keywords)
-                Text("문자나 OCR 결과에 표시되는 카드사 이름만 넣으세요. 카드번호는 넣지 않습니다.").font(.caption).foregroundStyle(.secondary)
+                Text("문자나 OCR 결과에 표시되는 카드사 이름만 넣으세요. 카드번호는 넣지 않습니다.").font(MoaFont.caption).foregroundStyle(.secondary)
                 Button("카드사 저장") { saveSource() }
                 if editingID != nil { Button("새 카드사 입력") { editingID = nil; name = ""; keywords = "" } }
             }
@@ -603,11 +603,11 @@ struct SetupGuide: View {
             ForEach(steps.indices, id: \.self) { index in
                 MoaCard {
                     HStack(alignment: .top, spacing: 14) {
-                        Text("\(index + 1)").font(.headline).foregroundStyle(.white)
+                        Text("\(index + 1)").font(MoaFont.headline).foregroundStyle(.white)
                             .frame(width: 34, height: 34).background(MoaTheme.teal, in: Circle())
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(steps[index].0).font(.headline)
-                            Text(steps[index].1).font(.subheadline).foregroundStyle(.secondary)
+                            Text(steps[index].0).font(MoaFont.headline)
+                            Text(steps[index].1).font(MoaFont.subheadline).foregroundStyle(.secondary)
                         }
                     }
                 }

@@ -98,6 +98,7 @@ struct RootView: View {
                 .tag(3)
         }
         .tint(MoaTheme.teal)
+        .environment(\.font, MoaFont.body)
         .onOpenURL { url in
             switch url.host {
             case "transactions": selection = 1
@@ -166,10 +167,10 @@ struct DashboardView: View {
             if model.settings["setupDone"] as? Bool != true {
                 NavigationLink { QuickSetupView() } label: {
                     HStack(spacing: 14) {
-                        Image(systemName: "wand.and.stars").font(.title2)
+                        Image(systemName: "wand.and.stars").font(MoaFont.title2)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("3분이면 준비 끝").font(.headline)
-                            Text("월급과 결산 시간만 먼저 맞춰보세요").font(.caption)
+                            Text("3분이면 준비 끝").font(MoaFont.headline)
+                            Text("월급과 결산 시간만 먼저 맞춰보세요").font(MoaFont.caption)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
@@ -185,8 +186,8 @@ struct DashboardView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(model.snapshot["month"] as? String ?? "이번 달")
-                            .font(.subheadline.bold()).foregroundStyle(.white.opacity(0.78))
-                        Text("남은 생활비").font(.headline).foregroundStyle(.white)
+                            .font(MoaFont.subheadlineBold).foregroundStyle(.white.opacity(0.78))
+                        Text("남은 생활비").font(MoaFont.headline).foregroundStyle(.white)
                     }
                     Spacer()
                     MoaStatusPill(
@@ -196,7 +197,7 @@ struct DashboardView: View {
                     )
                 }
                 Text(won(model.snapshot["remaining"]))
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .font(MoaFont.heroAmount)
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.65)
                 VStack(alignment: .leading, spacing: 8) {
@@ -206,7 +207,7 @@ struct DashboardView: View {
                         Spacer()
                         Text("하루 \(won(model.snapshot["recommendedDaily"]))")
                     }
-                    .font(.caption.bold()).foregroundStyle(.white.opacity(0.82))
+                    .font(MoaFont.captionBold).foregroundStyle(.white.opacity(0.82))
                 }
             }
             .padding(22)
@@ -262,9 +263,9 @@ struct DashboardView: View {
                     HStack(alignment: .top, spacing: 12) {
                         Image(systemName: "iphone.gen3").foregroundStyle(MoaTheme.teal)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("앱 전용 저장 모드").font(.headline)
+                            Text("앱 전용 저장 모드").font(MoaFont.headline)
                             Text("장부와 AI 분석은 정상 작동합니다. 위젯 연결 상태는 설정의 자동화 센터에서 확인할 수 있어요.")
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(MoaFont.caption).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -285,7 +286,7 @@ struct DashboardAction: View {
     var body: some View {
         Button(action: action) {
             Label(title, systemImage: systemImage)
-                .font(.subheadline.bold())
+                .font(MoaFont.subheadlineBold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .foregroundStyle(tint)
@@ -314,8 +315,8 @@ struct TransactionsView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "sparkles.rectangle.stack.fill").foregroundStyle(.orange)
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(pending[index]["reason"] as? String ?? "확인 필요").font(.headline)
-                                    Text(pending[index]["text"] as? String ?? "").font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                                    Text(pending[index]["reason"] as? String ?? "확인 필요").font(MoaFont.headline)
+                                    Text(pending[index]["text"] as? String ?? "").font(MoaFont.caption).foregroundStyle(.secondary).lineLimit(2)
                                 }
                             }
                         }
@@ -362,18 +363,18 @@ struct TransactionRow: View {
     var body: some View {
         HStack(spacing: 13) {
             Image(systemName: isIncome ? "arrow.down" : isReturn ? "arrow.uturn.backward" : "creditcard")
-                .font(.subheadline.bold())
+                .font(MoaFont.subheadlineBold)
                 .foregroundStyle(isIncome ? MoaTheme.teal : isReturn ? .orange : MoaTheme.coral)
                 .frame(width: 40, height: 40)
                 .background((isIncome ? MoaTheme.teal : isReturn ? Color.orange : MoaTheme.coral).opacity(0.11), in: Circle())
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.subheadline.bold()).lineLimit(1)
+                Text(title).font(MoaFont.subheadlineBold).lineLimit(1)
                 Text("\(row["day"] as? String ?? "") · \(row["category"] as? String ?? "기타")")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(MoaFont.caption).foregroundStyle(.secondary)
             }
             Spacer()
             Text((isIncome || isReturn ? "+" : "−") + won(row["amount"]))
-                .font(.subheadline.bold())
+                .font(MoaFont.subheadlineBold)
                 .foregroundStyle(isIncome ? MoaTheme.teal : isReturn ? .orange : .primary)
         }
         .padding(.vertical, 9)
@@ -436,7 +437,7 @@ struct EntryView: View {
                 }
             }
             Section {
-                Button("거래 저장") { save() }.frame(maxWidth: .infinity).font(.headline)
+                Button("거래 저장") { save() }.frame(maxWidth: .infinity).font(MoaFont.headline)
             }
         }
         .navigationTitle("빠른 기록")
@@ -477,11 +478,11 @@ struct ReportsView: View {
             .pickerStyle(.segmented)
             MoaCard {
                 HStack(spacing: 14) {
-                    Image(systemName: "sparkles").font(.title2).foregroundStyle(MoaTheme.teal)
+                    Image(systemName: "sparkles").font(MoaFont.title2).foregroundStyle(MoaTheme.teal)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("지금까지의 소비를 정리할까요?").font(.headline)
+                        Text("지금까지의 소비를 정리할까요?").font(MoaFont.headline)
                         Text("숫자 결산은 기기에서 먼저 저장되고, 선택한 경우에만 AI 분석을 덧붙입니다.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(MoaFont.caption).foregroundStyle(.secondary)
                     }
                 }
                 MoaPrimaryButton(title: running ? "분석 중…" : "현재 기간 결산 만들기", systemImage: "wand.and.stars", disabled: running) {
@@ -511,19 +512,19 @@ struct ReportCard: View {
     var body: some View {
         MoaCard {
             HStack {
-                Text(report["start"] as? String ?? "").font(.subheadline.bold())
+                Text(report["start"] as? String ?? "").font(MoaFont.subheadlineBold)
                 Spacer()
                 MoaStatusPill(
                     text: report["source"] as? String == "local" ? "기기 분석" : "AI 분석",
                     systemImage: report["source"] as? String == "local" ? "iphone" : "sparkles"
                 )
             }
-            Text(content["summary"] as? String ?? "").font(.body)
+            Text(content["summary"] as? String ?? "").font(MoaFont.body)
             ForEach(content["insights"] as? [String] ?? [], id: \.self) { insight in
-                Label(insight, systemImage: "chart.line.uptrend.xyaxis").font(.subheadline)
+                Label(insight, systemImage: "chart.line.uptrend.xyaxis").font(MoaFont.subheadline)
             }
             ForEach(content["actions"] as? [String] ?? [], id: \.self) { action in
-                Label(action, systemImage: "checkmark.circle.fill").font(.subheadline).foregroundStyle(MoaTheme.teal)
+                Label(action, systemImage: "checkmark.circle.fill").font(MoaFont.subheadline).foregroundStyle(MoaTheme.teal)
             }
         }
     }

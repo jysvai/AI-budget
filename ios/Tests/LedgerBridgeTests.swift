@@ -1,7 +1,12 @@
 import XCTest
+import UIKit
 @testable import AIBudget
 
 final class LedgerBridgeTests: XCTestCase {
+    func testPretendardFontIsBundled() {
+        XCTAssertNotNil(UIFont(name: "PretendardVariable-Regular", size: 17))
+    }
+
     func testBundledEngineParsesAndDeduplicatesOriginalSMS() throws {
         let engine = try CoreEngine()
         let state = try engine.call("initial").toDictionary()!

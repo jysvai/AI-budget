@@ -50,7 +50,7 @@ struct NoticeImportView: View {
                     Label(working ? "기기에서 인식 중…" : "사진에서 푸시 화면 선택", systemImage: "text.viewfinder")
                 }.disabled(working || sourceID.isEmpty)
                 Text("앱은 이미지를 업로드하거나 장부에 저장하지 않습니다. 아이폰의 Vision OCR로 읽은 뒤 앱의 메모리 사본을 버리고, 카드번호가 가려진 거래 결과만 저장합니다. 사진 앱에 있는 원본 캡처는 사용자가 별도로 삭제할 수 있습니다.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(MoaFont.caption).foregroundStyle(.secondary)
             }
             Section("또는 알림 문구 붙여넣기") {
                 TextEditor(text: $pastedText).frame(minHeight: 100)
