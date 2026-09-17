@@ -23,12 +23,24 @@ jobs:
       - name: Capture redesigned app screens
         run: |
           mkdir -p output/screenshots
-          DEVICE=$(xcrun simctl list devices available -j | ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.find { |x| x["name"].start_with?("iPhone") }; abort "No iPhone simulator" unless d; puts d["udid"]')
+          DEVICE=$(xcrun simctl list devices available -j | ruby -rjson -e 'all=JSON.parse(STDIN.read)["devices"].values.flatten; d=all.find { |x| x["name"] == "iPhone 16 Pro" } || all.find { |x| x["name"].start_with?("iPhone") }; abort "No iPhone simulator" unless d; puts d["udid"]')
           APP=$(find ~/Library/Developer/Xcode/DerivedData -path '*/Build/Products/Debug-iphonesimulator/AIBudget.app' -print -quit)
           test -n "$APP"
           xcrun simctl boot "$DEVICE" || true
-          xcrun simctl bootstatus "$DEVICE" -b
-          xcrun simctl install "$DEVICE" "$APP"
+          open -a Simulator --args -CurrentDeviceUDID "$DEVICE"
+          STATE=""
+          for attempt in {1..90}; do
+            STATE=$(xcrun simctl list devices -j | DEVICE="$DEVICE" ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.find { |x| x["udid"] == ENV["DEVICE"] }; puts(d && d["state"] || "Missing")')
+            [ "$STATE" = "Booted" ] && break
+            sleep 2
+          done
+          test "$STATE" = "Booted"
+          sleep 15
+          for attempt in {1..5}; do
+            xcrun simctl install "$DEVICE" "$APP" && break
+            [ "$attempt" = 5 ] && exit 1
+            sleep 5
+          done
           SIMCTL_CHILD_MOA_SCREENSHOT_DEMO=1 xcrun simctl launch --terminate-running-process "$DEVICE" com.yunseok.aibudget
           sleep 4
           xcrun simctl io "$DEVICE" screenshot output/screenshots/home.png
