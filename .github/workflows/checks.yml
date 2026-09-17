@@ -24,3 +24,17 @@ jobs:
         run: |
           DEVICE=$(xcrun simctl list devices available -j | ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.find { |x| x["name"].start_with?("iPhone") }; abort "No iPhone simulator" unless d; puts d["udid"]')
           xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO test
+      - name: Capture redesigned app screens
+        run: |
+          mkdir -p output/screenshots
+          SIMCTL_CHILD_MOA_SCREENSHOT_DEMO=1 xcrun simctl launch --terminate-running-process booted com.yunseok.aibudget
+          sleep 4
+          xcrun simctl io booted screenshot output/screenshots/home.png
+          xcrun simctl openurl booted aibudget://settings
+          sleep 2
+          xcrun simctl io booted screenshot output/screenshots/settings.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: redesigned-app-screens
+          path: output/screenshots/*.png
+          if-no-files-found: error

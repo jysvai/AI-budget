@@ -29,6 +29,22 @@ final class LedgerBridgeTests: XCTestCase {
         XCTAssertNotNil(state["transactions"])
     }
 
+    func testSideStoreRewrittenAppGroupIsDiscoveredFromProvisioningProfile() throws {
+        let expected = "group.com.yunseok.aibudget.AUCS8XRD4S"
+        let profile: [String: Any] = ["Entitlements": [
+            "com.apple.security.application-groups": [expected]
+        ]]
+        let plist = try PropertyListSerialization.data(fromPropertyList: profile, format: .xml, options: 0)
+        var wrapped = Data([0x30, 0x82, 0x01, 0x00])
+        wrapped.append(plist)
+        wrapped.append(contentsOf: [0x00, 0x00])
+        XCTAssertEqual(LedgerStore.provisionedAppGroups(from: wrapped), [expected])
+        XCTAssertEqual(
+            LedgerStore.appGroupCandidates(profileData: wrapped, configured: "group.com.yunseok.aibudget").first,
+            expected
+        )
+    }
+
     func testGroqDefaultModelOrder() {
         XCTAssertEqual(AIClient.groqModelOrder(preferred: ""), [
             "openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b",

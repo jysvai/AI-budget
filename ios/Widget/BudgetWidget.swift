@@ -16,7 +16,7 @@ struct BudgetProvider: TimelineProvider {
     }
     private func read() -> BudgetEntry {
         guard LedgerStore.sharedStorageAvailable else {
-            return BudgetEntry(date: Date(), snapshot: [:], error: "앱 위젯 공유 서명이 필요합니다.")
+            return BudgetEntry(date: Date(), snapshot: [:], error: "모아를 열어 최신 장부를 확인하세요")
         }
         do { return BudgetEntry(date: Date(), snapshot: try LedgerStore().snapshot(), error: nil) }
         catch { return BudgetEntry(date: Date(), snapshot: [:], error: "앱에서 장부 상태를 확인해주세요.") }
@@ -26,10 +26,22 @@ struct BudgetWidgetView: View {
     let entry: BudgetEntry
     @Environment(\.widgetFamily) var family
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("남은 생활비").font(.caption).foregroundStyle(.secondary)
-            if let error = entry.error { Text(error).font(.caption) }
+        VStack(alignment: .leading, spacing: 9) {
+            HStack {
+                Image(systemName: "wallet.pass.fill").foregroundStyle(.teal)
+                Text("모아").font(.caption.bold())
+                Spacer()
+                Text(entry.date, style: .time).font(.caption2).foregroundStyle(.secondary)
+            }
+            if let error = entry.error {
+                Spacer()
+                Text("장부는 안전하게 저장 중").font(.headline)
+                Text(error).font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Label("앱 열기", systemImage: "arrow.up.right").font(.caption.bold()).foregroundStyle(.teal)
+            }
             else {
+                Text("남은 생활비").font(.caption).foregroundStyle(.secondary)
                 Text(won(entry.snapshot["remaining"])).font(.title2.bold()).foregroundStyle(.teal).minimumScaleFactor(0.6)
                 Text("하루 권장 \(won(entry.snapshot["recommendedDaily"]))").font(.caption)
                 if family == .systemMedium {
@@ -40,7 +52,6 @@ struct BudgetWidgetView: View {
                 }
                 if let pending = entry.snapshot["pendingCount"] as? Int, pending > 0 { Text("미반영 검토 \(pending)건").font(.caption2).foregroundStyle(.orange) }
             }
-            Text(entry.date, style: .time).font(.caption2).foregroundStyle(.secondary)
         }.frame(maxWidth: .infinity, alignment: .leading)
             .containerBackground(.background, for: .widget)
             .widgetURL(URL(string: "aibudget://home"))

@@ -41,14 +41,56 @@ struct CoreEngine {
 }
 
 struct LedgerStore {
+    private static let resolvedGroupIdentifier: String? = {
+        let files = FileManager.default
+        for identifier in appGroupCandidates() {
+            if files.containerURL(forSecurityApplicationGroupIdentifier: identifier) != nil {
+                return identifier
+            }
+        }
+        return nil
+    }()
+
     static var sharedStorageAvailable: Bool {
-        guard let group = Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String else { return false }
-        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) != nil
+        resolvedGroupIdentifier != nil
+    }
+
+    static var sharedStorageDescription: String {
+        sharedStorageAvailable ? "앱과 위젯 연결됨" : "앱 전용 저장 모드"
+    }
+
+    static func appGroupCandidates(profileData: Data? = nil, configured: String? = nil) -> [String] {
+        let configured = configured ?? Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String
+        let data = profileData ?? Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision").flatMap { try? Data(contentsOf: $0) }
+        var groups = data.flatMap(provisionedAppGroups) ?? []
+        if let configured, !configured.isEmpty {
+            groups.sort {
+                let left = $0 == configured ? 0 : ($0.hasPrefix(configured + ".") ? 1 : 2)
+                let right = $1 == configured ? 0 : ($1.hasPrefix(configured + ".") ? 1 : 2)
+                return left < right
+            }
+            groups.append(configured)
+        }
+        var seen = Set<String>()
+        return groups.filter { !$0.isEmpty && seen.insert($0).inserted }
+    }
+
+    static func provisionedAppGroups(from data: Data) -> [String]? {
+        let xmlStart = Data("<?xml".utf8)
+        let plistStart = Data("<plist".utf8)
+        let plistEnd = Data("</plist>".utf8)
+        guard let start = data.range(of: xmlStart)?.lowerBound ?? data.range(of: plistStart)?.lowerBound,
+              let end = data.range(of: plistEnd, options: .backwards)?.upperBound,
+              start < end,
+              let object = try? PropertyListSerialization.propertyList(from: data.subdata(in: start..<end), options: [], format: nil),
+              let profile = object as? [String: Any],
+              let entitlements = profile["Entitlements"] as? [String: Any] else { return nil }
+        return entitlements["com.apple.security.application-groups"] as? [String]
     }
     private var file: URL {
         get throws {
             let local = try localFile()
-            guard let group = Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String,
+            guard let group = Self.resolvedGroupIdentifier,
                   let folder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) else {
                 return local
             }
