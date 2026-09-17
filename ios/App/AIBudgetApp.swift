@@ -71,7 +71,17 @@ import UserNotifications
 }
 
 struct RootView: View {
-    @State private var selection = 0
+    @State private var selection: Int
+
+    init() {
+        #if DEBUG
+        let requestedTab = ProcessInfo.processInfo.environment["MOA_SCREENSHOT_TAB"]
+        _selection = State(initialValue: requestedTab == "settings" ? 3 : 0)
+        #else
+        _selection = State(initialValue: 0)
+        #endif
+    }
+
     var body: some View {
         TabView(selection: $selection) {
             NavigationStack { DashboardView() }

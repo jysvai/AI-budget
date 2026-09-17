@@ -44,8 +44,8 @@ jobs:
           SIMCTL_CHILD_MOA_SCREENSHOT_DEMO=1 xcrun simctl launch --terminate-running-process "$DEVICE" com.yunseok.aibudget
           sleep 4
           xcrun simctl io "$DEVICE" screenshot output/screenshots/home.png
-          xcrun simctl openurl "$DEVICE" aibudget://settings
-          sleep 2
+          SIMCTL_CHILD_MOA_SCREENSHOT_DEMO=1 SIMCTL_CHILD_MOA_SCREENSHOT_TAB=settings xcrun simctl launch --terminate-running-process "$DEVICE" com.yunseok.aibudget
+          sleep 4
           xcrun simctl io "$DEVICE" screenshot output/screenshots/settings.png
       - uses: actions/upload-artifact@v4
         with:
