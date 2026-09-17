@@ -1,0 +1,26 @@
+name: Core and iOS checks
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm test
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate native project
+        run: |
+          brew install xcodegen
+          cd ios
+          xcodegen generate
+      - name: Build app, App Intents and widget for simulator
+        run: xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget -sdk iphonesimulator -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build-for-testing
+      - name: Run native bridge tests
+        run: |
+          DEVICE=$(xcrun simctl list devices available -j | ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.find { |x| x["name"].start_with?("iPhone") }; abort "No iPhone simulator" unless d; puts d["udid"]')
+          xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget -sdk iphonesimulator -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO test

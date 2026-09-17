@@ -1,0 +1,74 @@
+name: iOS IPA for iloader
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'App version (e.g. 0.2.0)'
+        default: '0.2.0'
+        required: true
+      publish:
+        description: 'Publish IPA and SideStore feed to GitHub Releases'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+concurrency:
+  group: ipa-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      APP_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate requested version
+        run: node -e 'if (!/^\d+\.\d+\.\d+$/.test(process.env.APP_VERSION)) process.exit(1)'
+      - name: Core and API tests
+        run: npm test
+      - name: Generate native app and widget
+        run: |
+          brew install xcodegen
+          cd ios
+          xcodegen generate
+      - name: Build for physical iPhone without Apple credentials
+        run: |
+          set -euo pipefail
+          xcodebuild -project ios/AIBudget.xcodeproj -scheme AIBudget \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build MARKETING_VERSION="$APP_VERSION" \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' build
+      - name: Preserve app-group entitlements and package IPA
+        run: bash scripts/package-ipa.sh
+      - name: Generate SideStore source artifact
+        run: node scripts/generate-source.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-budget-ipa
+          path: |
+            output/AIBudget.ipa
+            output/apps.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish release (only when explicitly selected)
+        if: inputs.publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: 모아 가계부 ${{ inputs.version }}
+          files: |
+            output/AIBudget.ipa
+            output/apps.json
+          body: |
+            iloader로 AIBudget.ipa를 설치하거나 SideStore에서 가져오세요.
+            최초 설치 후 앱의 설정 안내에 따라 문자 자동화·시간 자동화·위젯을 연결합니다.
+            위젯을 유지하려면 재서명 시 App Extensions와 App Groups를 제거하지 마세요.
+            세부 절차: docs/iloader-install.md

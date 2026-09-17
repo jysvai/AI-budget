@@ -1,0 +1,6 @@
+{
+  "name": "ai-budget",
+  "private": true,
+  "scripts": { "test": "node --test tests/*.test.cjs", "gateway": "node gateway/server.cjs" },
+  "engines": { "node": ">=22" }
+}
