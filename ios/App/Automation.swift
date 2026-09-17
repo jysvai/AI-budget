@@ -4,6 +4,12 @@ import UserNotifications
 import WidgetKit
 
 enum Notices {
+    static func requestAuthorizationIfNeeded() async {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        guard settings.authorizationStatus == .notDetermined else { return }
+        _ = try? await center.requestAuthorization(options: [.alert, .sound, .badge])
+    }
     static func show(_ title: String, _ body: String, id: String = UUID().uuidString) async throws {
         let content = UNMutableNotificationContent()
         content.title = title; content.body = body; content.sound = .default

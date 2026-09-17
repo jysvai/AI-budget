@@ -15,6 +15,9 @@ struct BudgetProvider: TimelineProvider {
         completion(Timeline(entries: [read()], policy: .after(Date().addingTimeInterval(1800))))
     }
     private func read() -> BudgetEntry {
+        guard LedgerStore.sharedStorageAvailable else {
+            return BudgetEntry(date: Date(), snapshot: [:], error: "앱 위젯 공유 서명이 필요합니다.")
+        }
         do { return BudgetEntry(date: Date(), snapshot: try LedgerStore().snapshot(), error: nil) }
         catch { return BudgetEntry(date: Date(), snapshot: [:], error: "앱에서 장부 상태를 확인해주세요.") }
     }

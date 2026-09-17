@@ -6,9 +6,14 @@ import UserNotifications
     @Published var state: [String: Any] = [:]
     @Published var snapshot: [String: Any] = [:]
     @Published var message: String?
+    @Published var sharedStorageAvailable = LedgerStore.sharedStorageAvailable
     var settings: [String: Any] { state["settings"] as? [String: Any] ?? [:] }
     func refresh() {
-        do { state = try LedgerStore().read(); snapshot = try LedgerStore().snapshot() }
+        do {
+            state = try LedgerStore().read()
+            snapshot = try LedgerStore().snapshot()
+            sharedStorageAvailable = LedgerStore.sharedStorageAvailable
+        }
         catch { message = error.localizedDescription }
     }
     @discardableResult func save(_ operation: String, _ input: [String: Any]) -> Bool {
@@ -23,7 +28,10 @@ import UserNotifications
     var body: some Scene {
         WindowGroup {
             RootView().environmentObject(model)
-                .task { model.refresh() }
+                .task {
+                    model.refresh()
+                    await Notices.requestAuthorizationIfNeeded()
+                }
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active {
                         model.refresh()
@@ -63,6 +71,14 @@ struct DashboardView: View {
     @State private var add = false
     var body: some View {
         List {
+            if !model.sharedStorageAvailable {
+                Section {
+                    Label("앱 자체 저장공간으로 실행 중", systemImage: "iphone")
+                        .foregroundStyle(.orange)
+                    Text("SideStore 서명에 App Group이 없어도 장부와 AI 분석은 이 앱 안에 안전하게 저장됩니다. 위젯과 확장 기능의 장부 공유만 제한됩니다.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
             if model.settings["setupDone"] as? Bool != true {
                 Section { NavigationLink("처음 설정하고 자동 기록 시작하기") { SettingsView() } }
             }

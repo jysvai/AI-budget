@@ -20,6 +20,8 @@ Windows의 소스 → GitHub Actions macOS 빌드 → AIBudget.ipa → iloader �
 
 **실기기 필수 점검:** iloader/SideStore 재서명 후 앱과 위젯이 같은 App Group을 사용해야 합니다. 설치 도구가 식별자를 재작성할 수 있으므로 원래 group 문자열과 실행 시 접근 가능한 group이 일치하는지 확인해야 합니다. 호환성이 검증되기 전 위젯이 작동한다고 보장하지 않습니다. extension 제거를 선택하면 위젯도 제거됩니다.
 
+App Group이 재서명 과정에서 빠지거나 바뀌면 앱 본체는 `Application Support/MoaBudget`의 자체 저장공간으로 자동 전환합니다. 이 경우 장부·결산·개인 API는 동작하지만 위젯과 다른 확장 프로세스의 실시간 장부 공유는 제한됩니다. App Group은 사용자가 iOS 권한 팝업으로 허용하는 항목이 아니므로 앱에서 요청할 수 없습니다. 알림 권한은 앱 최초 실행 시 자동으로 요청합니다.
+
 ## 사용자가 하는 설치
 
 1. 기존 iloader/SideStore 환경을 사용합니다. 새로 설치할 경우 [공식 iloader](https://github.com/nab138/iloader)에서 배포본을 받습니다.

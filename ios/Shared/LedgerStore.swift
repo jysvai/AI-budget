@@ -41,13 +41,42 @@ struct CoreEngine {
 }
 
 struct LedgerStore {
+    static var sharedStorageAvailable: Bool {
+        guard let group = Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String else { return false }
+        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) != nil
+    }
     private var file: URL {
         get throws {
+            let local = try localFile()
             guard let group = Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String,
                   let folder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) else {
-                throw LedgerError.message("장부 저장 공간에 접근할 수 없습니다. 앱 서명과 App Group 설정을 확인해주세요.")
+                return local
             }
-            return folder.appendingPathComponent("ledger-v2.json")
+            let shared = folder.appendingPathComponent("ledger-v2.json")
+            try migrateLocalLedgerIfNeeded(from: local, to: shared)
+            return shared
+        }
+    }
+    private func localFile() throws -> URL {
+        guard let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            throw LedgerError.message("앱 자체 저장 공간을 준비하지 못했습니다.")
+        }
+        let folder = base.appendingPathComponent("MoaBudget", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder.appendingPathComponent("ledger-v2.json")
+    }
+    private func migrateLocalLedgerIfNeeded(from local: URL, to shared: URL) throws {
+        let files = FileManager.default
+        guard !files.fileExists(atPath: shared.path), files.fileExists(atPath: local.path) else { return }
+        do { try files.copyItem(at: local, to: shared) }
+        catch {
+            if files.fileExists(atPath: shared.path) { return }
+            throw error
+        }
+        let localBackup = local.appendingPathExtension("backup")
+        let sharedBackup = shared.appendingPathExtension("backup")
+        if files.fileExists(atPath: localBackup.path), !files.fileExists(atPath: sharedBackup.path) {
+            try? files.copyItem(at: localBackup, to: sharedBackup)
         }
     }
     // Coordinates app, App Intents and Widget extension writes across processes.

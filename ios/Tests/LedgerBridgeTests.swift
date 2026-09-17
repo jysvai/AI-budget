@@ -23,6 +23,12 @@ final class LedgerBridgeTests: XCTestCase {
         XCTAssertThrowsError(try AIClient.validate(["status": "stable", "summary": "ok", "insights": "wrong", "actions": []]))
     }
 
+    func testLedgerStoreCanReadWithOrWithoutSharedAppGroup() throws {
+        let state = try LedgerStore().read()
+        XCTAssertNotNil(state["settings"])
+        XCTAssertNotNil(state["transactions"])
+    }
+
     func testGroqDefaultModelOrder() {
         XCTAssertEqual(AIClient.groqModelOrder(preferred: ""), [
             "openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b",
