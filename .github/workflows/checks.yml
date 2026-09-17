@@ -27,12 +27,18 @@ jobs:
       - name: Capture redesigned app screens
         run: |
           mkdir -p output/screenshots
-          SIMCTL_CHILD_MOA_SCREENSHOT_DEMO=1 xcrun simctl launch --terminate-running-process booted com.yunseok.aibudget
+          DEVICE=$(xcrun simctl list devices available -j | ruby -rjson -e 'd=JSON.parse(STDIN.read)["devices"].values.flatten.find { |x| x["name"].start_with?("iPhone") }; abort "No iPhone simulator" unless d; puts d["udid"]')
+          APP=$(find ~/Library/Developer/Xcode/DerivedData -path '*/Build/Products/Debug-iphonesimulator/AIBudget.app' -print -quit)
+          test -n "$APP"
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
+          xcrun simctl install "$DEVICE" "$APP"
+          SIMCTL_CHILD_MOA_SCREENSHOT_DEMO=1 xcrun simctl launch --terminate-running-process "$DEVICE" com.yunseok.aibudget
           sleep 4
-          xcrun simctl io booted screenshot output/screenshots/home.png
-          xcrun simctl openurl booted aibudget://settings
+          xcrun simctl io "$DEVICE" screenshot output/screenshots/home.png
+          xcrun simctl openurl "$DEVICE" aibudget://settings
           sleep 2
-          xcrun simctl io booted screenshot output/screenshots/settings.png
+          xcrun simctl io "$DEVICE" screenshot output/screenshots/settings.png
       - uses: actions/upload-artifact@v4
         with:
           name: redesigned-app-screens
