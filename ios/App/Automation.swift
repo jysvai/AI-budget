@@ -76,7 +76,9 @@ actor AuditRunner {
             .sorted { ($0["start"] as? String ?? "") > ($1["start"] as? String ?? "") }
         if settings["aiMode"] as? String != "local", settings["consent"] as? Bool == true {
             do {
-                let batch = Array(pending.prefix(12))
+                // Six concise reports keep one request below the personal Groq account's 8K TPM ceiling.
+                // Remaining reports are picked up on the next app activation without losing local results.
+                let batch = Array(pending.prefix(6))
                 let results: [String: [String: Any]]
                 if batch.isEmpty { results = [:] }
                 else { results = try await AIClient.analyzeBatch(reports: batch, settings: settings) }

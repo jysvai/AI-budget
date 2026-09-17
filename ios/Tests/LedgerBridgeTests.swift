@@ -22,4 +22,27 @@ final class LedgerBridgeTests: XCTestCase {
     func testAIResponseValidationRejectsWrongTypes() throws {
         XCTAssertThrowsError(try AIClient.validate(["status": "stable", "summary": "ok", "insights": "wrong", "actions": []]))
     }
+
+    func testGroqDefaultModelOrder() {
+        XCTAssertEqual(AIClient.groqModelOrder(preferred: ""), [
+            "openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b",
+            "groq/compound-mini", "groq/compound"
+        ])
+    }
+
+    func testGroqPreferredModelMovesToFrontWithoutDuplication() {
+        let models = AIClient.groqModelOrder(preferred: "groq/compound-mini")
+        XCTAssertEqual(models.first, "groq/compound-mini")
+        XCTAssertEqual(models.count, Set(models).count)
+        XCTAssertEqual(Set(models), Set(AIClient.groqModels))
+    }
+
+    func testGroqFallbackStatusPolicy() {
+        for status in [403, 404, 422, 424, 429, 498, 500, 502, 503] {
+            XCTAssertTrue(AIClient.shouldTryNextGroqModel(statusCode: status))
+        }
+        for status in [400, 401, 413] {
+            XCTAssertFalse(AIClient.shouldTryNextGroqModel(statusCode: status))
+        }
+    }
 }

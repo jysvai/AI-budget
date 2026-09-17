@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var consent = false
     @State private var showPlan = false
     @State private var notificationState = "확인 전"
+    @AppStorage("lastGroqModel") private var lastGroqModel = ""
     var body: some View {
         Form {
             Section("1 · 내 예산") {
@@ -49,7 +50,24 @@ struct SettingsView: View {
                     }.onChange(of: provider) { _, _ in key = ""; modelID = "" }
                     SecureField("API 키 (비워두면 기존 키 유지)", text: $key).textInputAutocapitalization(.never).autocorrectionDisabled()
                     Link("선택한 서비스에서 API 키 발급받기", destination: URL(string: provider == "groq" ? "https://console.groq.com/keys" : provider == "openrouter" ? "https://openrouter.ai/settings/keys" : "https://aistudio.google.com/apikey")!)
-                    TextField("모델 ID (선택)", text: $modelID).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    if provider == "groq" {
+                        Picker("Groq 모델", selection: $modelID) {
+                            Text("자동 순환 · 추천").tag("")
+                            Text("GPT-OSS 120B 우선").tag("openai/gpt-oss-120b")
+                            Text("Qwen 3.8 27B · 실험").tag("qwen/qwen3.8-27b")
+                            Text("GPT-OSS 20B · 빠름").tag("openai/gpt-oss-20b")
+                            Text("Compound Mini 우선").tag("groq/compound-mini")
+                            Text("Compound 우선").tag("groq/compound")
+                        }
+                        Text("선택 모델부터 시작해 한도 초과·접근 제한·일시 장애 시 나머지 모델로 자동 전환합니다. Compound의 검색·코드 도구는 개인정보 보호를 위해 끕니다.")
+                            .font(.caption).foregroundStyle(.secondary)
+                        if !lastGroqModel.isEmpty {
+                            LabeledContent("최근 성공 모델", value: lastGroqModel)
+                                .font(.caption)
+                        }
+                    } else {
+                        TextField("모델 ID (선택)", text: $modelID).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    }
                     Button("이 공급자의 저장된 키 삭제", role: .destructive) {
                         do { try Secrets.set("api-" + provider, ""); key = ""; model.message = "API 키를 삭제했습니다." }
                         catch { model.message = error.localizedDescription }
