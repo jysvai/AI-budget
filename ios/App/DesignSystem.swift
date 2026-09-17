@@ -37,7 +37,9 @@ struct MoaCard<Content: View>: View {
     }
 
     var body: some View {
-        content
+        VStack(alignment: .leading, spacing: 14) {
+            content
+        }
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
